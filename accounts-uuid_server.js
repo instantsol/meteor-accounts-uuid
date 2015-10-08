@@ -1,14 +1,11 @@
 // Write your package code here!
 // Handler to login with a phone number and code.
 var createUser = function (options) {
-    check(options, Match.ObjectIncluding({
-        uuid: Match.Optional(String),
-    }));
+    check(options, {
+        uuid: String,
+    });
 
     var uuid = options.uuid;
-    if (!uuid) {
-        throw new Meteor.Error(400, "Need to set a uuid");
-    }
 
     var user = {services: {}};
     user.services.uuid = { uuid: uuid };
@@ -18,11 +15,15 @@ var createUser = function (options) {
 };
 
 Accounts.registerLoginHandler('uuid', function (options) {
-    console.log("DELETEME: uuid stuff??" );
     check(options, {
         uuid: String,
     });
-    if (!Meteor.isCordova) return;
-    console.log("DELETEME: uuid stuff", options.uuid);
-    return ;
+    var user = Meteor.users.findOne({"uuid":options.uuid});
+    var userId ;
+    if (user) {
+        userId = user._id;
+    } else {
+        userId = createUser(options);
+    }
+    return {userId: userId};
 });
